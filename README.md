@@ -1,5 +1,7 @@
-# 🛒 Amazon Customer Segmentation using Machine Learning
-### Hackathon ML Project — End-to-End Production Pipeline
+ <p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:8e2de2,100:4a00e0&height=180&section=header&text=📝%20Amazon%20Customer%20Using%2Segmentation&fontSize=34&fontColor=ffffff&animation=fadeIn&fontAlignY=35"/>
+</p> 
+## Hackathon ML Project — End-to-End Production Pipeline
 
 This project builds an **end-to-end machine learning pipeline** to segment Amazon customers based on purchasing behavior. The system uses **unsupervised learning algorithms** to discover hidden customer groups and helps businesses perform **targeted marketing and personalized recommendations**.
 
@@ -202,19 +204,20 @@ Potential improvements for this project:
 - Recommendation system integration
 
 ---
-
-## 👨‍💻 Author
+## 👨‍💻 Author  
 
 **Lomada Siva Gangi Reddy**  
-Data Science Graduate | Machine Learning Enthusiast  
+- 🎓 B.Tech CSE (Data Science), RGMCET (2021–2025)  
+- 💡 Interests: Python | Machine Learning | Deep Learning | Data Science  
+- 📍 Open to **Internships & Job Offers**
 
-📧 Email  lomadasivagangireddy3@gmail.com  
+ **Contact Me**:  
 
-🔗 LinkedIn  
-https://www.linkedin.com/in/lomada-siva-gangi-reddy-a64197280/
+- 📧 **Email**: lomadasivagangireddy3@gmail.com  
+- 📞 **Phone**: 9346493592  
+- 💼 [LinkedIn](https://www.linkedin.com/in/lomada-siva-gangi-reddy-a64197280/)  🌐 [GitHub](https://github.com/shivareddy2002)  🚀 [Portfolio](https://lsgr-portfolio-pulse.lovable.app/)
 
-💻 GitHub  
-https://github.com/shivareddy2002  
-
-🌐 Portfolio  
-https://lsgr-portfolio-pulse.lovable.app/
+---
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:f9c74f,100:ff4b4b&height=120&section=footer"/>
+</p>
