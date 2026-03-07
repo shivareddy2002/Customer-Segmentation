@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% block title %}ML Workflow — SegmentAI{% endblock %}
+
+{% block extra_head %}
+<style>
+  .page-header { padding: 4rem 2rem 2rem; text-align: center; }
+  .page-header .tag {
+    font-family: 'Space Mono',monospace; font-size:.75rem;
+    color:var(--crimson); letter-spacing:3px; text-transform:uppercase;
+    margin-bottom:1rem; display:block;
+  }
+  .page-header h1 { font-size:2.8rem; font-weight:700; margin-bottom:1rem; }
+  .page-header p { color:var(--muted); max-width:600px; margin:0 auto; line-height:1.7; }
+
+  .timeline-wrap { max-width: 900px; margin: 3rem auto; padding: 0 2rem 4rem; }
+
+  .step {
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    gap: 1.5rem;
+    margin-bottom: 0;
+    position: relative;
+  }
+
+  /* Vertical line */
+  .step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 29px; top: 60px;
+    width: 2px;
+    height: calc(100% + 0px);
+    background: linear-gradient(to bottom, var(--crimson), transparent);
+    opacity: 0.3;
+  }
+
+  .step-num {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    border: 2px solid var(--crimson);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Mono',monospace;
+    font-size: .9rem; font-weight: 700;
+    color: var(--crimson);
+    background: rgba(233,69,96,0.08);
+    flex-shrink: 0;
+    position: relative; z-index: 1;
+  }
+
+  .step-body {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 1.5rem;
+    transition: border-color .2s;
+  }
+  .step-body:hover { border-color: rgba(233,69,96,.3); }
+
+  .step-body h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: .5rem; }
+  .step-body p { color: var(--muted); font-size: .9rem; line-height: 1.7; margin-bottom: 1rem; }
+
+  .code-block {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    font-family: 'Space Mono', monospace;
+    font-size: .78rem;
+    color: #a8b4c8;
+    overflow-x: auto;
+    line-height: 1.6;
+    white-space: pre;
+  }
+  .kw { color: #E94560; }
+  .fn { color: #05C4B6; }
+  .st { color: #a78bfa; }
+  .cm { color: #4a5568; }
+  .num-c { color: #f6ad55; }
+
+  .pills { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .75rem; }
+  .pill {
+    background: rgba(233,69,96,0.1);
+    color: var(--crimson);
+    border-radius: 99px;
+    padding: .2rem .75rem;
+    font-size: .75rem;
+    font-weight: 600;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <span class="tag">End-to-End Pipeline</span>
+  <h1>ML Workflow</h1>
+  <p>Every step from raw CSV to deployed predictions — a complete production-grade machine learning pipeline.</p>
+</div>
+
+<div class="timeline-wrap">
+
+  {% set steps = [
+    {
+      "n": "01",
+      "title": "Import Libraries",
+      "desc": "All scientific Python libraries required for data processing, visualization, modeling, and serving.",
+      "code": "<span class='kw'>import</span> pandas <span class='kw'>as</span> pd\n<span class='kw'>import</span> numpy <span class='kw'>as</span> np\n<span class='kw'>from</span> sklearn.cluster <span class='kw'>import</span> KMeans, DBSCAN\n<span class='kw'>from</span> sklearn.preprocessing <span class='kw'>import</span> StandardScaler\n<span class='kw'>from</span> sklearn.metrics <span class='kw'>import</span> silhouette_score\n<span class='kw'>from</span> sklearn.decomposition <span class='kw'>import</span> PCA\n<span class='kw'>import</span> joblib, flask",
+      "pills": ["Pandas","NumPy","Scikit-learn","Matplotlib","Flask"]
+    },
+    {
+      "n": "02",
+      "title": "Load & Clean Data",
+      "desc": "Read the raw Amazon sales CSV. Handle missing values, duplicates, and parse datetime columns.",
+      "code": "df = pd.<span class='fn'>read_csv</span>(<span class='st'>'amazon_sales.csv'</span>)\ndf[<span class='st'>'purchase_date'</span>] = pd.<span class='fn'>to_datetime</span>(df[<span class='st'>'purchase_date'</span>])\ndf = df.<span class='fn'>dropna</span>().<span class='fn'>drop_duplicates</span>()\ndf = df[(df[<span class='st'>'price'</span>] > <span class='num-c'>0</span>) & (df[<span class='st'>'quantity'</span>] > <span class='num-c'>0</span>)]",
+      "pills": ["Missing Values","Duplicates","Type Casting"]
+    },
+    {
+      "n": "03",
+      "title": "RFM Feature Engineering",
+      "desc": "Aggregate transaction-level data into customer-level RFM features: Recency, Frequency, Monetary.",
+      "code": "snapshot = df[<span class='st'>'purchase_date'</span>].<span class='fn'>max</span>() + pd.<span class='fn'>Timedelta</span>(days=<span class='num-c'>1</span>)\nrfm = df.<span class='fn'>groupby</span>(<span class='st'>'customer_id'</span>).<span class='fn'>agg</span>({\n    <span class='st'>'purchase_date'</span>: <span class='kw'>lambda</span> x: (snapshot - x.<span class='fn'>max</span>()).days,\n    <span class='st'>'product_id'</span>   : <span class='st'>'count'</span>,\n    <span class='st'>'total_spent'</span>  : <span class='st'>'sum'</span>\n})\nrfm.columns = [<span class='st'>'Recency'</span>, <span class='st'>'Frequency'</span>, <span class='st'>'Monetary'</span>]",
+      "pills": ["Recency","Frequency","Monetary","GroupBy"]
+    },
+    {
+      "n": "04",
+      "title": "Behavioral Features + Derived Metrics",
+      "desc": "Create 11 additional behavioral features including engagement score and loyalty index.",
+      "code": "behavior = df.<span class='fn'>groupby</span>(<span class='st'>'customer_id'</span>).<span class='fn'>agg</span>(\n    avg_rating=(<span class='st'>'rating'</span>,<span class='st'>'mean'</span>),\n    unique_categories=(<span class='st'>'product_category'</span>,<span class='st'>'nunique'</span>)\n)\n<span class='cm'># Derived features</span>\ncustomer_df[<span class='st'>'engagement_score'</span>] = (\n    customer_df[<span class='st'>'avg_rating'</span>] * np.<span class='fn'>log1p</span>(customer_df[<span class='st'>'total_reviews'</span>])\n)\ncustomer_df[<span class='st'>'loyalty_index'</span>] = (\n    customer_df[<span class='st'>'Frequency'</span>] / (customer_df[<span class='st'>'Recency'</span>] + <span class='num-c'>1</span>)\n)",
+      "pills": ["Engagement Score","Loyalty Index","14 Features Total"]
+    },
+    {
+      "n": "05",
+      "title": "Feature Scaling",
+      "desc": "StandardScaler normalizes all features to zero-mean, unit-variance — required for distance-based clustering.",
+      "code": "scaler = <span class='fn'>StandardScaler</span>()\nscaled = scaler.<span class='fn'>fit_transform</span>(features)\n<span class='cm'># Save scaler for prediction on unseen data</span>\njoblib.<span class='fn'>dump</span>(scaler, <span class='st'>'models/scaler.pkl'</span>)",
+      "pills": ["StandardScaler","Zero Mean","Unit Variance"]
+    },
+    {
+      "n": "06",
+      "title": "Optimal Clusters (Elbow + Silhouette)",
+      "desc": "Iterate k=2..9, record WCSS for elbow method and silhouette score to find optimal number of clusters.",
+      "code": "<span class='kw'>for</span> k <span class='kw'>in</span> <span class='fn'>range</span>(<span class='num-c'>2</span>, <span class='num-c'>10</span>):\n    km = <span class='fn'>KMeans</span>(n_clusters=k, random_state=<span class='num-c'>42</span>)\n    lbl = km.<span class='fn'>fit_predict</span>(scaled)\n    wcss.<span class='fn'>append</span>(km.inertia_)\n    sil.<span class='fn'>append</span>(<span class='fn'>silhouette_score</span>(scaled, lbl))\nbest_k = k_range[np.<span class='fn'>argmax</span>(sil)]",
+      "pills": ["Elbow Method","Silhouette","k=2..9"]
+    },
+    {
+      "n": "07",
+      "title": "K-Means + Hierarchical + DBSCAN",
+      "desc": "Apply all three algorithms. K-Means for final segmentation, Hierarchical for dendrogram, DBSCAN for noise detection.",
+      "code": "<span class='cm'># K-Means (primary)</span>\nkmeans = <span class='fn'>KMeans</span>(n_clusters=best_k, random_state=<span class='num-c'>42</span>)\ncustomer_df[<span class='st'>'cluster'</span>] = kmeans.<span class='fn'>fit_predict</span>(scaled)\n\n<span class='cm'># Hierarchical</span>\nlinked = <span class='fn'>linkage</span>(sample, method=<span class='st'>'ward'</span>)\n<span class='fn'>dendrogram</span>(linked)\n\n<span class='cm'># DBSCAN</span>\ndbscan = <span class='fn'>DBSCAN</span>(eps=<span class='num-c'>1.5</span>, min_samples=<span class='num-c'>5</span>)\ncustomer_df[<span class='st'>'dbscan_cluster'</span>] = dbscan.<span class='fn'>fit_predict</span>(scaled)",
+      "pills": ["K-Means","Hierarchical","DBSCAN","Ward Linkage"]
+    },
+    {
+      "n": "08",
+      "title": "PCA Visualization",
+      "desc": "Reduce 14 dimensions to 2 principal components for visual cluster exploration.",
+      "code": "pca = <span class='fn'>PCA</span>(n_components=<span class='num-c'>2</span>)\ncoords = pca.<span class='fn'>fit_transform</span>(scaled)\npca_df = pd.<span class='fn'>DataFrame</span>(coords, columns=[<span class='st'>'PC1'</span>,<span class='st'>'PC2'</span>])\npca_df[<span class='st'>'cluster'</span>] = customer_df[<span class='st'>'cluster'</span>]\n<span class='cm'># Variance explained</span>\nprint(pca.explained_variance_ratio_)",
+      "pills": ["PCA","2D Projection","Variance Ratio"]
+    },
+    {
+      "n": "09",
+      "title": "10 Visualizations Generated",
+      "desc": "Automated plot generation: distributions, scatter plots, box plots, heatmap, and cluster PCA view.",
+      "code": "<span class='cm'># Example: Spending by Cluster</span>\nsns.<span class='fn'>boxplot</span>(x=<span class='st'>'cluster'</span>, y=<span class='st'>'Monetary'</span>, data=customer_df)\n<span class='cm'># Saves: recency_dist, frequency_dist, monetary_dist,</span>\n<span class='cm'>#        cluster_count, recency_monetary, freq_monetary,</span>\n<span class='cm'>#        rating_cluster, spending_cluster,</span>\n<span class='cm'>#        loyalty_cluster, correlation_heatmap</span>",
+      "pills": ["Matplotlib","Seaborn","10 Plots","Auto-Save PNG"]
+    },
+    {
+      "n": "10",
+      "title": "Save Models & Deploy Flask",
+      "desc": "Persist all artifacts for serving. Flask app exposes prediction endpoint for real-time customer classification.",
+      "code": "joblib.<span class='fn'>dump</span>(kmeans,  <span class='st'>'models/kmeans_model.pkl'</span>)\njoblib.<span class='fn'>dump</span>(scaler,  <span class='st'>'models/scaler.pkl'</span>)\njoblib.<span class='fn'>dump</span>(pca,     <span class='st'>'models/pca.pkl'</span>)\n\n<span class='cm'># Flask prediction endpoint</span>\n@app.<span class='fn'>route</span>(<span class='st'>'/predict'</span>, methods=[<span class='st'>'POST'</span>])\n<span class='kw'>def</span> <span class='fn'>predict</span>():\n    scaled_row = scaler.<span class='fn'>transform</span>(row)\n    cluster_id = kmeans.<span class='fn'>predict</span>(scaled_row)[<span class='num-c'>0</span>]\n    <span class='kw'>return</span> cluster_labels[cluster_id]",
+      "pills": ["Joblib","Flask","REST API","Real-time Prediction"]
+    },
+  ] %}
+
+  {% for s in steps %}
+  <div class="step">
+    <div class="step-num">{{ s.n }}</div>
+    <div class="step-body">
+      <h3>{{ s.title }}</h3>
+      <p>{{ s.desc }}</p>
+      <div class="code-block">{{ s.code | safe }}</div>
+      <div class="pills">
+        {% for pill in s.pills %}
+        <span class="pill">{{ pill }}</span>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+
+</div>
+{% endblock %}

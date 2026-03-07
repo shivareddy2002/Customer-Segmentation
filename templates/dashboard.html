@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — SegmentAI{% endblock %}
+
+{% block extra_head %}
+<style>
+  .page-header { padding: 3rem 2rem 1.5rem; text-align: center; }
+  .page-header .tag {
+    font-family:'Space Mono',monospace; font-size:.75rem;
+    color:var(--crimson); letter-spacing:3px; text-transform:uppercase;
+    margin-bottom:1rem; display:block;
+  }
+  .page-header h1 { font-size:2.5rem; font-weight:700; margin-bottom:.5rem; }
+  .page-header p { color:var(--muted); }
+
+  .wrap { max-width: 1300px; margin: 0 auto; padding: 0 2rem 4rem; }
+
+  /* KPI Cards */
+  .kpi-row { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap: 1rem; margin-bottom: 2.5rem; }
+  .kpi-card {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all .2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--clr) 0%, transparent 60%);
+    opacity: 0.06;
+    pointer-events: none;
+  }
+  .kpi-card:hover { transform: translateY(-3px); border-color: rgba(233,69,96,.3); }
+  .kpi-icon { font-size: 1.5rem; margin-bottom: .5rem; }
+  .kpi-val {
+    font-family: 'Space Mono',monospace;
+    font-size: 2rem; font-weight: 700;
+    color: var(--clr);
+  }
+  .kpi-name { font-size: .9rem; font-weight: 600; margin: .25rem 0; }
+  .kpi-sub { font-size: .78rem; color: var(--muted); }
+  .kpi-bar { height: 3px; border-radius: 2px; margin-top: 1rem; background: var(--clr); opacity: .5; }
+
+  /* Segment detail cards */
+  .seg-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(260px,1fr));
+    gap: 1.25rem;
+    margin-bottom: 3rem;
+  }
+  .seg-detail {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+  }
+  .seg-header { display: flex; align-items: center; gap: .75rem; margin-bottom: 1rem; }
+  .seg-header .ico { font-size: 1.5rem; }
+  .seg-header h3 { font-size: 1rem; font-weight: 700; }
+  .seg-row { display:flex; justify-content:space-between; align-items:center;
+    padding: .4rem 0; border-bottom: 1px solid var(--border); }
+  .seg-row:last-child { border: none; }
+  .seg-row .lbl { font-size: .8rem; color: var(--muted); }
+  .seg-row .val { font-family: 'Space Mono',monospace; font-size: .85rem; font-weight: 600; }
+  .strategy-box {
+    margin-top: .75rem;
+    background: rgba(233,69,96,0.06);
+    border: 1px solid rgba(233,69,96,0.15);
+    border-radius: 8px;
+    padding: .75rem;
+    font-size: .8rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .strategy-box strong { color: var(--crimson); display: block; margin-bottom: .25rem; }
+
+  /* Model Metrics */
+  .metrics-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1rem; margin-bottom:3rem; }
+  .metric-box {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    text-align: center;
+  }
+  .metric-box .m-val {
+    font-family: 'Space Mono',monospace;
+    font-size: 1.6rem; font-weight: 700; color: var(--teal);
+  }
+  .metric-box .m-lbl { font-size: .78rem; color: var(--muted); margin-top: .25rem; }
+
+  /* Recommendations */
+  .reco-table {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 3rem;
+  }
+  .reco-table table { width:100%; border-collapse:collapse; }
+  .reco-table th {
+    background: rgba(233,69,96,0.1);
+    color: var(--crimson);
+    font-family:'Space Mono',monospace;
+    font-size:.75rem; letter-spacing:1px;
+    padding:.8rem 1.25rem; text-align:left;
+  }
+  .reco-table td { padding:.7rem 1.25rem; color:var(--muted); font-size:.875rem;
+    border-bottom:1px solid var(--border); }
+  .reco-table tr:last-child td { border:none; }
+
+  /* Plots grid */
+  .plots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(420px,1fr));
+    gap: 1.5rem;
+  }
+  .plot-card {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: all .2s;
+  }
+  .plot-card:hover { transform: translateY(-2px); border-color: rgba(233,69,96,.3); }
+  .plot-title {
+    padding: .8rem 1.25rem;
+    font-size: .85rem; font-weight: 600;
+    border-bottom: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .plot-card img { width:100%; display:block; }
+
+  .section-tag {
+    font-family:'Space Mono',monospace;
+    font-size:.72rem; color:var(--crimson);
+    letter-spacing:2px; text-transform:uppercase;
+    margin-bottom:.75rem; display:block;
+  }
+  .section-head { font-size:1.7rem; font-weight:700; margin-bottom:1.5rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <span class="tag">Live Analytics</span>
+  <h1>Segmentation Dashboard</h1>
+  <p>Real-time insights from {{ meta.n_customers }} customers across {{ meta.best_k }} segments</p>
+</div>
+
+<div class="wrap">
+
+  <!-- Model Metrics -->
+  <div class="metrics-grid" style="margin-bottom:2rem">
+    <div class="metric-box">
+      <div class="m-val">{{ meta.n_customers }}</div>
+      <div class="m-lbl">Total Customers</div>
+    </div>
+    <div class="metric-box">
+      <div class="m-val">{{ meta.best_k }}</div>
+      <div class="m-lbl">Segments</div>
+    </div>
+    <div class="metric-box">
+      <div class="m-val">{{ meta.silhouette_score }}</div>
+      <div class="m-lbl">Silhouette Score</div>
+    </div>
+    <div class="metric-box">
+      <div class="m-val">{{ meta.pca_variance[0] }}%</div>
+      <div class="m-lbl">PC1 Variance</div>
+    </div>
+    <div class="metric-box">
+      <div class="m-val">14</div>
+      <div class="m-lbl">Features Used</div>
+    </div>
+    <div class="metric-box">
+      <div class="m-val">K-Means</div>
+      <div class="m-lbl">Primary Model</div>
+    </div>
+  </div>
+
+  <!-- KPI Cards per segment -->
+  <span class="section-tag">Segment Overview</span>
+  <h2 class="section-head">Customer Distribution</h2>
+  <div class="kpi-row">
+    {% for name, s in stats.items() %}
+    <div class="kpi-card" style="--clr:{{ s.color }}">
+      <div class="kpi-icon">{{ s.icon }}</div>
+      <div class="kpi-val">{{ s.count }}</div>
+      <div class="kpi-name">{{ name }}</div>
+      <div class="kpi-sub">{{ s.pct }}% of customers</div>
+      <div class="kpi-bar" style="width:{{ s.pct }}%"></div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Detailed Segment Cards -->
+  <span class="section-tag">Segment Intelligence</span>
+  <h2 class="section-head">Per-Segment Breakdown</h2>
+  <div class="seg-detail-grid">
+    {% for name, s in stats.items() %}
+    <div class="seg-detail" style="border-top: 3px solid {{ s.color }}">
+      <div class="seg-header">
+        <div class="ico">{{ s.icon }}</div>
+        <div>
+          <h3>{{ name }}</h3>
+          <span class="badge" style="background:rgba(255,255,255,.05);color:var(--muted)">{{ s.count }} customers</span>
+        </div>
+      </div>
+      <div class="seg-row">
+        <span class="lbl">Avg Spending</span>
+        <span class="val">${{ s.avg_spend }}</span>
+      </div>
+      <div class="seg-row">
+        <span class="lbl">Avg Frequency</span>
+        <span class="val">{{ s.avg_freq }} orders</span>
+      </div>
+      <div class="seg-row">
+        <span class="lbl">Share</span>
+        <span class="val">{{ s.pct }}%</span>
+      </div>
+      <div class="strategy-box">
+        <strong>📌 Strategy</strong>
+        {{ s.strategy }}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Category Recommendations -->
+  <span class="section-tag">Recommendations</span>
+  <h2 class="section-head">Top Product Categories per Segment</h2>
+  <div class="reco-table">
+    <table>
+      <thead>
+        <tr><th>Segment</th><th>Category</th><th>Purchase Count</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for r in recs %}
+        <tr>
+          <td>
+            {% for name, s in stats.items() %}
+              {% if loop.index0 == r.cluster %}
+                <span style="color:{{ s.color }}">{{ s.icon }} {{ name }}</span>
+              {% endif %}
+            {% endfor %}
+          </td>
+          <td>{{ r.product_category }}</td>
+          <td><span style="font-family:'Space Mono',monospace">{{ r.count }}</span></td>
+          <td><span class="badge">Promote</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Visualizations -->
+  <span class="section-tag">Visual Insights</span>
+  <h2 class="section-head">10 Analytical Charts</h2>
+  <div class="plots-grid">
+    {% for plot in plots %}
+    <div class="plot-card">
+      <div class="plot-title">{{ plot.title }}</div>
+      <img src="/static/plots/{{ plot.file }}" alt="{{ plot.title }}" loading="lazy">
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

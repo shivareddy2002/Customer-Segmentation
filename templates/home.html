@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+{% block title %}SegmentAI — Amazon Customer Segmentation{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* Hero */
+  .hero {
+    min-height: calc(100vh - 64px);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+    padding: 4rem 2rem;
+    position: relative;
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(233,69,96,0.12) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    pointer-events: none;
+  }
+
+  .hero-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--crimson);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp .6s ease forwards .2s;
+  }
+
+  .hero h1 {
+    font-size: clamp(2.8rem, 6vw, 5rem);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp .6s ease forwards .4s;
+  }
+  .hero h1 em { font-style: normal; color: var(--crimson); }
+
+  .hero p {
+    max-width: 560px;
+    color: var(--muted);
+    font-size: 1.1rem;
+    line-height: 1.7;
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    animation: fadeUp .6s ease forwards .6s;
+  }
+
+  .hero-btns {
+    display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
+    opacity: 0;
+    animation: fadeUp .6s ease forwards .8s;
+  }
+
+  /* Stat bar */
+  .stat-bar {
+    display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center;
+    padding: 2rem;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--glass);
+    opacity: 0;
+    animation: fadeUp .6s ease forwards 1s;
+  }
+  .stat-item { text-align: center; }
+  .stat-item .val {
+    font-family: 'Space Mono', monospace;
+    font-size: 2rem; font-weight: 700;
+    color: var(--crimson);
+  }
+  .stat-item .lbl { font-size: 0.8rem; color: var(--muted); margin-top: 0.25rem; }
+
+  /* Segments section */
+  .section { padding: 5rem 2rem; max-width: 1200px; margin: 0 auto; }
+  .section-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem; color: var(--crimson);
+    letter-spacing: 3px; text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .section h2 { font-size: 2.2rem; font-weight: 700; margin-bottom: 3rem; }
+
+  .segments-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.25rem;
+  }
+  .seg-card {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.75rem;
+    transition: all .25s;
+    cursor: default;
+  }
+  .seg-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+  }
+  .seg-icon { font-size: 2rem; margin-bottom: 1rem; }
+  .seg-card h3 { font-size: 1.1rem; margin-bottom: .5rem; }
+  .seg-card p { color: var(--muted); font-size: .875rem; line-height: 1.6; }
+  .seg-tag {
+    display: inline-block;
+    margin-top: .75rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 99px;
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+
+  /* Tech stack */
+  .tech-row {
+    display: flex; flex-wrap: wrap; gap: 0.75rem;
+    margin-top: 2rem;
+  }
+  .tech-chip {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.4rem 1rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <p class="hero-tag">Machine Learning · Unsupervised · Clustering</p>
+  <h1>Know Your Customer.<br><em>Grow Your Revenue.</em></h1>
+  <p>Advanced RFM-based customer segmentation using K-Means, Hierarchical, and DBSCAN clustering — built on real Amazon sales data.</p>
+  <div class="hero-btns">
+    <a href="/dashboard" class="btn btn-primary">📊 View Dashboard</a>
+    <a href="/predict"   class="btn btn-outline">⚡ Predict Segment</a>
+    <a href="/workflow"  class="btn btn-outline">🔁 See Workflow</a>
+  </div>
+</section>
+
+<!-- Stats -->
+<div class="stat-bar">
+  <div class="stat-item">
+    <div class="val">{{ meta.n_customers }}</div>
+    <div class="lbl">Customers Analyzed</div>
+  </div>
+  <div class="stat-item">
+    <div class="val">{{ meta.best_k }}</div>
+    <div class="lbl">Segments Discovered</div>
+  </div>
+  <div class="stat-item">
+    <div class="val">{{ meta.silhouette_score }}</div>
+    <div class="lbl">Silhouette Score</div>
+  </div>
+  <div class="stat-item">
+    <div class="val">14</div>
+    <div class="lbl">Features Engineered</div>
+  </div>
+  <div class="stat-item">
+    <div class="val">10</div>
+    <div class="lbl">Visualizations</div>
+  </div>
+  <div class="stat-item">
+    <div class="val">3</div>
+    <div class="lbl">Clustering Algorithms</div>
+  </div>
+</div>
+
+<!-- Segments -->
+<div class="section">
+  <p class="section-title">Customer Segments</p>
+  <h2>Four Distinct Customer Profiles</h2>
+  <div class="segments-grid">
+    <div class="seg-card" style="--accent:#E94560">
+      <div class="seg-icon">💎</div>
+      <h3>High-Value Customers</h3>
+      <p>Top spenders with high frequency. The most profitable customer group.</p>
+      <span class="seg-tag" style="background:rgba(233,69,96,0.15);color:#E94560">VIP Program</span>
+    </div>
+    <div class="seg-card" style="--accent:#0F3460">
+      <div class="seg-icon">🔁</div>
+      <h3>Frequent Buyers</h3>
+      <p>Buy regularly at mid-range values. High retention and loyalty potential.</p>
+      <span class="seg-tag" style="background:rgba(15,52,96,0.25);color:#60a5fa">Subscriptions</span>
+    </div>
+    <div class="seg-card" style="--accent:#533483">
+      <div class="seg-icon">🏷️</div>
+      <h3>Discount Shoppers</h3>
+      <p>Price-sensitive buyers driven by deals and promotions.</p>
+      <span class="seg-tag" style="background:rgba(83,52,131,0.25);color:#a78bfa">Coupons</span>
+    </div>
+    <div class="seg-card" style="--accent:#05C4B6">
+      <div class="seg-icon">📅</div>
+      <h3>Occasional Buyers</h3>
+      <p>Infrequent purchases. Prime candidates for re-engagement campaigns.</p>
+      <span class="seg-tag" style="background:rgba(5,196,182,0.15);color:#05C4B6">Retargeting</span>
+    </div>
+  </div>
+</div>
+
+<!-- Tech Stack -->
+<div class="section" style="padding-top:0">
+  <p class="section-title">Technology Stack</p>
+  <h2>Built with Production-Grade Tools</h2>
+  <div class="tech-row">
+    {% for t in ["Python 3","Pandas","NumPy","Scikit-learn","Matplotlib","Seaborn","SciPy","Flask","Joblib","RFM Model","K-Means","DBSCAN","Hierarchical","PCA"] %}
+    <div class="tech-chip">{{ t }}</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

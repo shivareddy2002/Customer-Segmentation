@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+{% block title %}About — SegmentAI{% endblock %}
+
+{% block extra_head %}
+<style>
+  .page-header {
+    padding: 4rem 2rem 2rem;
+    text-align: center;
+  }
+  .page-header .tag {
+    font-family: 'Space Mono', monospace;
+    font-size: .75rem; color: var(--crimson);
+    letter-spacing: 3px; text-transform: uppercase;
+    margin-bottom: 1rem; display: block;
+  }
+  .page-header h1 { font-size: 2.8rem; font-weight: 700; margin-bottom: 1rem; }
+  .page-header p { color: var(--muted); max-width: 600px; margin: 0 auto; line-height: 1.7; }
+
+  .content-wrap { max-width: 1100px; margin: 0 auto; padding: 3rem 2rem; }
+
+  /* About grid */
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; margin-bottom: 4rem; }
+  @media(max-width:768px){ .about-grid { grid-template-columns: 1fr; } }
+  .about-block h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; }
+  .about-block p { color: var(--muted); line-height: 1.8; margin-bottom: 1rem; }
+
+  /* Problem/Objective cards */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 3rem; }
+  @media(max-width:768px){ .two-col { grid-template-columns: 1fr; } }
+
+  .info-card {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+  }
+  .info-card h3 {
+    font-size: 1.1rem; font-weight: 700;
+    margin-bottom: 1rem;
+    display: flex; align-items: center; gap: .5rem;
+  }
+  .info-card ul { list-style: none; padding: 0; }
+  .info-card ul li {
+    color: var(--muted);
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: .9rem;
+    display: flex; align-items: center; gap: .5rem;
+  }
+  .info-card ul li:last-child { border: none; }
+  .info-card ul li::before { content: '→'; color: var(--crimson); }
+
+  /* Dataset table */
+  .table-wrap {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 3rem;
+  }
+  .table-wrap table { width: 100%; border-collapse: collapse; }
+  .table-wrap th {
+    background: rgba(233,69,96,0.1);
+    color: var(--crimson);
+    font-family: 'Space Mono', monospace;
+    font-size: .78rem;
+    letter-spacing: 1px;
+    padding: 0.8rem 1.2rem;
+    text-align: left;
+  }
+  .table-wrap td {
+    padding: 0.75rem 1.2rem;
+    color: var(--muted);
+    font-size: .875rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .table-wrap tr:last-child td { border: none; }
+  .table-wrap tr:hover td { color: var(--text); background: rgba(255,255,255,0.02); }
+
+  /* Algorithms */
+  .algo-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.25rem; }
+  @media(max-width:768px){ .algo-grid { grid-template-columns: 1fr; } }
+  .algo-card {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+  }
+  .algo-card .num {
+    font-family: 'Space Mono', monospace;
+    font-size: 2rem; font-weight: 700; color: var(--crimson);
+    opacity: .4; margin-bottom: .5rem;
+  }
+  .algo-card h4 { font-size: 1rem; font-weight: 700; margin-bottom: .5rem; }
+  .algo-card p { color: var(--muted); font-size: .85rem; line-height: 1.6; }
+
+  .section-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: .72rem; color: var(--crimson);
+    letter-spacing: 2px; text-transform: uppercase;
+    margin-bottom: .75rem; display: block;
+  }
+  .section-head { font-size: 1.7rem; font-weight: 700; margin-bottom: 1.5rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <span class="tag">About this Project</span>
+  <h1>Amazon Customer<br>Segmentation</h1>
+  <p>A production-grade unsupervised ML system that identifies distinct customer profiles from transactional data to power targeted marketing.</p>
+</div>
+
+<div class="content-wrap">
+
+  <!-- Problem & Objective -->
+  <div class="two-col">
+    <div class="info-card">
+      <h3>🎯 Problem Statement</h3>
+      <ul>
+        <li>Segment customers by purchasing behavior</li>
+        <li>Enable targeted marketing campaigns</li>
+        <li>Build personalized recommendation logic</li>
+        <li>Identify high-value vs. at-risk customers</li>
+        <li>Reduce churn through proactive strategy</li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h3>✅ Project Objectives</h3>
+      <ul>
+        <li>Engineer RFM + behavioral features</li>
+        <li>Apply K-Means, Hierarchical & DBSCAN</li>
+        <li>Evaluate with silhouette score</li>
+        <li>Build visual insight dashboard</li>
+        <li>Deploy prediction for unseen customers</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Dataset columns -->
+  <span class="section-tag">Dataset</span>
+  <h2 class="section-head">Raw Input Features</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Column</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for col in [
+          ("customer_id",    "Integer", "Unique customer identifier"),
+          ("product_id",     "Integer", "Unique product identifier"),
+          ("product_category","String", "Category of purchased item"),
+          ("price",          "Float",   "Unit price of the product"),
+          ("quantity",       "Integer", "Number of units purchased"),
+          ("rating",         "Float",   "Customer rating (1–5 scale)"),
+          ("review_count",   "Integer", "Number of reviews given"),
+          ("purchase_date",  "DateTime","Timestamp of purchase"),
+        ] %}
+        <tr>
+          <td style="font-family:'Space Mono',monospace;color:var(--teal)">{{ col[0] }}</td>
+          <td><span class="badge">{{ col[1] }}</span></td>
+          <td>{{ col[2] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Engineered features -->
+  <span class="section-tag">Feature Engineering</span>
+  <h2 class="section-head">14 Engineered Features</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Feature</th><th>Category</th><th>Description</th></tr></thead>
+      <tbody>
+        {% for row in [
+          ("Recency","RFM","Days since last purchase — lower = more recent"),
+          ("Frequency","RFM","Total number of transactions"),
+          ("Monetary","RFM","Total amount spent"),
+          ("total_quantity","Behavior","Sum of all units ordered"),
+          ("avg_price","Behavior","Average product price"),
+          ("avg_rating","Behavior","Average rating given"),
+          ("total_reviews","Behavior","Total reviews submitted"),
+          ("unique_categories","Behavior","Number of distinct product categories"),
+          ("avg_order_value","Behavior","Mean spend per transaction"),
+          ("max_single_spend","Behavior","Largest single transaction"),
+          ("purchase_days","Behavior","Number of distinct purchase days"),
+          ("weekend_purchases","Behavior","Purchases on Sat/Sun"),
+          ("engagement_score","Derived","Rating × log(reviews)"),
+          ("loyalty_index","Derived","Frequency / (Recency + 1)"),
+        ] %}
+        <tr>
+          <td style="font-family:'Space Mono',monospace;color:var(--teal)">{{ row[0] }}</td>
+          <td><span class="badge">{{ row[1] }}</span></td>
+          <td>{{ row[2] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Algorithms -->
+  <span class="section-tag">Algorithms</span>
+  <h2 class="section-head">Three Clustering Approaches</h2>
+  <div class="algo-grid">
+    <div class="algo-card">
+      <div class="num">01</div>
+      <h4>K-Means Clustering</h4>
+      <p>Primary algorithm. Optimal k selected via elbow method + silhouette scoring. Fast and scalable for production use.</p>
+    </div>
+    <div class="algo-card">
+      <div class="num">02</div>
+      <h4>Hierarchical Clustering</h4>
+      <p>Ward linkage dendogram to understand nested cluster structure. Validates K-Means k choice visually.</p>
+    </div>
+    <div class="algo-card">
+      <div class="num">03</div>
+      <h4>DBSCAN</h4>
+      <p>Density-based algorithm. Excellent for detecting noise and outlier customers who don't fit standard profiles.</p>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

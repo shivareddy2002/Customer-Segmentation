@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Amazon Customer Segmentation{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --crimson : #E94560;
+      --navy    : #0F3460;
+      --deep    : #16213E;
+      --dark    : #0A0E1A;
+      --purple  : #533483;
+      --teal    : #05C4B6;
+      --text    : #E8ECF4;
+      --muted   : #8892A4;
+      --glass   : rgba(255,255,255,0.04);
+      --border  : rgba(255,255,255,0.08);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--dark);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── BACKGROUND GRID ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(233,69,96,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(233,69,96,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem;
+      height: 64px;
+      background: rgba(10,14,26,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-brand {
+      font-family: 'Space Mono', monospace;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--crimson);
+      text-decoration: none;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .nav-brand span { color: var(--text); }
+
+    .nav-links { display: flex; gap: 0.25rem; }
+    .nav-links a {
+      padding: 0.4rem 0.9rem;
+      border-radius: 6px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all .2s;
+    }
+    .nav-links a:hover, .nav-links a.active {
+      color: var(--text);
+      background: var(--glass);
+    }
+    .nav-links a.active { color: var(--crimson); }
+
+    /* ── MAIN ── */
+    main { position: relative; z-index: 1; }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.65rem 1.4rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      border: none;
+      transition: all .2s;
+    }
+    .btn-primary {
+      background: var(--crimson);
+      color: #fff;
+    }
+    .btn-primary:hover { background: #c73550; transform: translateY(-1px); }
+    .btn-outline {
+      border: 1px solid var(--border);
+      color: var(--text);
+      background: transparent;
+    }
+    .btn-outline:hover { border-color: var(--crimson); color: var(--crimson); }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      backdrop-filter: blur(10px);
+      transition: border-color .2s, transform .2s;
+    }
+    .card:hover { border-color: rgba(233,69,96,.3); transform: translateY(-2px); }
+
+    /* ── BADGE ── */
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(233,69,96,0.15);
+      color: var(--crimson);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+      border-top: 1px solid var(--border);
+      margin-top: 4rem;
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--dark); }
+    ::-webkit-scrollbar-thumb { background: var(--navy); border-radius: 3px; }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <nav>
+    <a class="nav-brand" href="/">⬡ <span>SegmentAI</span></a>
+    <div class="nav-links">
+      <a href="/"         class="{% if request.endpoint=='home'      %}active{% endif %}">Home</a>
+      <a href="/about"    class="{% if request.endpoint=='about'     %}active{% endif %}">About</a>
+      <a href="/workflow" class="{% if request.endpoint=='workflow'  %}active{% endif %}">Workflow</a>
+      <a href="/dashboard"class="{% if request.endpoint=='dashboard' %}active{% endif %}">Dashboard</a>
+      <a href="/predict"  class="{% if request.endpoint=='predict'   %}active{% endif %}">Predict</a>
+    </div>
+  </nav>
+
+  <main>{% block content %}{% endblock %}</main>
+
+  <footer>Built with Python · Scikit-learn · Flask — Amazon Customer Segmentation © 2024</footer>
+</body>
+</html>

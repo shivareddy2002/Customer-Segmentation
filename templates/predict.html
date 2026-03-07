@@ -1,0 +1,341 @@
+{% extends "base.html" %}
+{% block title %}Predict Segment — SegmentAI{% endblock %}
+
+{% block extra_head %}
+<style>
+  .page-header { padding: 3rem 2rem 1.5rem; text-align: center; }
+  .page-header .tag {
+    font-family:'Space Mono',monospace; font-size:.75rem;
+    color:var(--crimson); letter-spacing:3px; text-transform:uppercase;
+    margin-bottom:1rem; display:block;
+  }
+  .page-header h1 { font-size:2.5rem; font-weight:700; margin-bottom:.5rem; }
+  .page-header p { color:var(--muted); }
+
+  .predict-wrap {
+    max-width: 1000px; margin: 0 auto;
+    padding: 2rem 2rem 5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+  @media(max-width:768px){ .predict-wrap { grid-template-columns: 1fr; } }
+
+  /* Form */
+  .form-card {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+  }
+  .form-card h2 { font-size: 1.25rem; font-weight: 700; margin-bottom: 1.5rem; }
+
+  .form-section { margin-bottom: 1.5rem; }
+  .form-section-label {
+    font-family: 'Space Mono',monospace;
+    font-size: .7rem; color: var(--crimson);
+    letter-spacing: 2px; text-transform: uppercase;
+    margin-bottom: .75rem; display: block;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: .4rem;
+  }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+
+  .form-group { display: flex; flex-direction: column; gap: .3rem; }
+  .form-group label { font-size: .8rem; color: var(--muted); font-weight: 500; }
+  .form-group input {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: .55rem .85rem;
+    color: var(--text);
+    font-family: 'Space Mono',monospace;
+    font-size: .85rem;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .form-group input:focus { border-color: var(--crimson); }
+  .form-group input:hover { border-color: rgba(255,255,255,.15); }
+
+  .submit-btn {
+    width: 100%;
+    padding: .8rem;
+    background: var(--crimson);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: all .2s;
+    letter-spacing: .5px;
+  }
+  .submit-btn:hover { background: #c73550; transform: translateY(-1px); }
+
+  /* Result */
+  .result-card {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    position: sticky;
+    top: 80px;
+  }
+  .result-card h2 { font-size: 1.25rem; font-weight: 700; margin-bottom: 1.5rem; }
+
+  .result-segment {
+    text-align: center;
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    border: 2px solid var(--seg-color, var(--crimson));
+    background: rgba(0,0,0,.2);
+  }
+  .result-segment .big-icon { font-size: 3.5rem; margin-bottom: .5rem; }
+  .result-segment h3 { font-size: 1.5rem; font-weight: 700; color: var(--seg-color, var(--crimson)); }
+  .result-segment p { color: var(--muted); font-size: .9rem; margin-top: .5rem; line-height: 1.6; }
+
+  .strategy-result {
+    background: rgba(233,69,96,0.06);
+    border: 1px solid rgba(233,69,96,0.2);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.25rem;
+    font-size: .875rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .strategy-result strong { color: var(--crimson); display: block; margin-bottom: .25rem; }
+
+  /* Distance bars */
+  .dist-title {
+    font-family: 'Space Mono',monospace;
+    font-size: .7rem; color: var(--crimson);
+    letter-spacing: 2px; text-transform: uppercase;
+    margin-bottom: .75rem; display: block;
+  }
+  .dist-row { margin-bottom: .5rem; }
+  .dist-label { display: flex; justify-content: space-between; font-size: .78rem; margin-bottom: .2rem; }
+  .dist-label .dn { color: var(--muted); }
+  .dist-label .dv { font-family:'Space Mono',monospace; color: var(--text); }
+  .dist-bar-wrap { height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow:hidden; }
+  .dist-bar-fill { height: 100%; border-radius: 3px; transition: width .6s ease; }
+
+  /* Placeholder */
+  .placeholder {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--muted);
+  }
+  .placeholder .ph-icon { font-size: 3rem; margin-bottom: 1rem; opacity: .4; }
+  .placeholder p { font-size: .9rem; line-height: 1.6; }
+
+  /* Presets */
+  .preset-row { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .preset-btn {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: .35rem .85rem;
+    font-size: .78rem;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .preset-btn:hover { border-color: var(--crimson); color: var(--crimson); }
+
+  .error-box {
+    background: rgba(233,69,96,.1);
+    border: 1px solid rgba(233,69,96,.3);
+    border-radius: 10px;
+    padding: 1rem;
+    color: var(--crimson);
+    font-size: .875rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <span class="tag">Real-Time Prediction</span>
+  <h1>Predict Customer Segment</h1>
+  <p>Enter customer behavioral data to classify them into one of the learned segments.</p>
+</div>
+
+<div class="predict-wrap">
+  <!-- Form -->
+  <div>
+    <!-- Quick presets -->
+    <div class="preset-row">
+      <span style="font-size:.8rem;color:var(--muted);align-self:center;margin-right:.25rem">Quick fill:</span>
+      <button class="preset-btn" onclick="fillPreset('highvalue')">💎 High-Value</button>
+      <button class="preset-btn" onclick="fillPreset('frequent')">🔁 Frequent</button>
+      <button class="preset-btn" onclick="fillPreset('discount')">🏷️ Discount</button>
+      <button class="preset-btn" onclick="fillPreset('occasional')">📅 Occasional</button>
+    </div>
+
+    <div class="form-card">
+      <h2>Customer Data Input</h2>
+      <form method="POST" action="/predict">
+
+        <!-- RFM -->
+        <div class="form-section">
+          <span class="form-section-label">RFM Features</span>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Recency (days since last purchase)</label>
+              <input type="number" id="f-recency" name="recency" value="{{ result.input.Recency if result and not result.error else 30 }}" min="0" step="1" required>
+            </div>
+            <div class="form-group">
+              <label>Frequency (total orders)</label>
+              <input type="number" id="f-frequency" name="frequency" value="{{ result.input.Frequency if result and not result.error else 5 }}" min="1" step="1" required>
+            </div>
+            <div class="form-group">
+              <label>Monetary (total spent $)</label>
+              <input type="number" id="f-monetary" name="monetary" value="{{ result.input.Monetary if result and not result.error else 1200 }}" min="0" step="0.01" required>
+            </div>
+            <div class="form-group">
+              <label>Avg Order Value ($)</label>
+              <input type="number" id="f-avg_order_value" name="avg_order_value" value="{{ result.input.avg_order_value if result and not result.error else 240 }}" min="0" step="0.01" required>
+            </div>
+          </div>
+        </div>
+
+        <!-- Behavioral -->
+        <div class="form-section">
+          <span class="form-section-label">Behavioral Features</span>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Total Quantity Ordered</label>
+              <input type="number" id="f-total_quantity" name="total_quantity" value="{{ result.input.total_quantity if result and not result.error else 8 }}" min="1" required>
+            </div>
+            <div class="form-group">
+              <label>Avg Product Price ($)</label>
+              <input type="number" id="f-avg_price" name="avg_price" value="{{ result.input.avg_price if result and not result.error else 150 }}" min="0" step="0.01" required>
+            </div>
+            <div class="form-group">
+              <label>Avg Rating (1–5)</label>
+              <input type="number" id="f-avg_rating" name="avg_rating" value="{{ result.input.avg_rating if result and not result.error else 4.2 }}" min="1" max="5" step="0.1" required>
+            </div>
+            <div class="form-group">
+              <label>Total Reviews Given</label>
+              <input type="number" id="f-total_reviews" name="total_reviews" value="{{ result.input.total_reviews if result and not result.error else 12 }}" min="0" required>
+            </div>
+            <div class="form-group">
+              <label>Unique Categories</label>
+              <input type="number" id="f-unique_categories" name="unique_categories" value="{{ result.input.unique_categories if result and not result.error else 3 }}" min="1" required>
+            </div>
+            <div class="form-group">
+              <label>Max Single Spend ($)</label>
+              <input type="number" id="f-max_single_spend" name="max_single_spend" value="{{ result.input.max_single_spend if result and not result.error else 500 }}" min="0" step="0.01" required>
+            </div>
+            <div class="form-group">
+              <label>Active Purchase Days</label>
+              <input type="number" id="f-purchase_days" name="purchase_days" value="{{ result.input.purchase_days if result and not result.error else 4 }}" min="1" required>
+            </div>
+            <div class="form-group">
+              <label>Weekend Purchases</label>
+              <input type="number" id="f-weekend_purchases" name="weekend_purchases" value="{{ result.input.weekend_purchases if result and not result.error else 2 }}" min="0" required>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn">⚡ Predict Segment</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Result Panel -->
+  <div class="result-card">
+    <h2>Prediction Result</h2>
+
+    {% if result %}
+      {% if result.error %}
+        <div class="error-box">⚠️ Error: {{ result.error }}</div>
+      {% else %}
+        <div class="result-segment" style="--seg-color:{{ result.color }}">
+          <div class="big-icon">{{ result.icon }}</div>
+          <h3>{{ result.segment_name }}</h3>
+          <p>{{ result.desc }}</p>
+        </div>
+
+        <div class="strategy-result">
+          <strong>📌 Recommended Strategy</strong>
+          {{ result.strategy }}
+        </div>
+
+        <span class="dist-title">Distance to All Clusters</span>
+        {% set max_dist = result.distances[-1].distance %}
+        {% for d in result.distances %}
+        <div class="dist-row">
+          <div class="dist-label">
+            <span class="dn">
+              {% if d.cluster == result.cluster_id %}⭐{% endif %}
+              Cluster {{ d.cluster }} — {{ d.name }}
+            </span>
+            <span class="dv">{{ d.distance }}</span>
+          </div>
+          <div class="dist-bar-wrap">
+            <div class="dist-bar-fill"
+              style="width:{{ [(1 - d.distance/max_dist)*100, 5]|max }}%;
+                     background:{% if d.cluster == result.cluster_id %}{{ result.color }}{% else %}#2a3550{% endif %}">
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% endif %}
+    {% else %}
+      <div class="placeholder">
+        <div class="ph-icon">🔍</div>
+        <p>Fill in the customer behavioral data on the left and click <strong>Predict Segment</strong> to classify them.</p>
+        <p style="margin-top:.75rem">You can also use the <strong>Quick fill</strong> presets above the form to test typical customer profiles.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+const presets = {
+  highvalue: {
+    recency:15, frequency:7, monetary:4500, avg_order_value:643,
+    total_quantity:12, avg_price:380, avg_rating:4.8, total_reviews:25,
+    unique_categories:5, max_single_spend:1200, purchase_days:7, weekend_purchases:3
+  },
+  frequent: {
+    recency:45, frequency:5, monetary:1800, avg_order_value:360,
+    total_quantity:9, avg_price:200, avg_rating:4.2, total_reviews:14,
+    unique_categories:4, max_single_spend:500, purchase_days:5, weekend_purchases:2
+  },
+  discount: {
+    recency:180, frequency:2, monetary:300, avg_order_value:150,
+    total_quantity:4, avg_price:75, avg_rating:3.1, total_reviews:3,
+    unique_categories:2, max_single_spend:180, purchase_days:2, weekend_purchases:1
+  },
+  occasional: {
+    recency:600, frequency:1, monetary:120, avg_order_value:120,
+    total_quantity:1, avg_price:120, avg_rating:2.5, total_reviews:1,
+    unique_categories:1, max_single_spend:120, purchase_days:1, weekend_purchases:0
+  }
+};
+
+function fillPreset(type) {
+  const p = presets[type];
+  if (!p) return;
+  document.getElementById('f-recency').value          = p.recency;
+  document.getElementById('f-frequency').value        = p.frequency;
+  document.getElementById('f-monetary').value         = p.monetary;
+  document.getElementById('f-avg_order_value').value  = p.avg_order_value;
+  document.getElementById('f-total_quantity').value   = p.total_quantity;
+  document.getElementById('f-avg_price').value        = p.avg_price;
+  document.getElementById('f-avg_rating').value       = p.avg_rating;
+  document.getElementById('f-total_reviews').value    = p.total_reviews;
+  document.getElementById('f-unique_categories').value= p.unique_categories;
+  document.getElementById('f-max_single_spend').value = p.max_single_spend;
+  document.getElementById('f-purchase_days').value    = p.purchase_days;
+  document.getElementById('f-weekend_purchases').value= p.weekend_purchases;
+}
+</script>
+{% endblock %}
