@@ -3,6 +3,8 @@
 
 This project builds an **end-to-end machine learning pipeline** to segment Amazon customers based on purchasing behavior. The system uses **unsupervised learning algorithms** to discover hidden customer groups and helps businesses perform **targeted marketing and personalized recommendations**.
 
+## Project DEMO LINK: https://customer-segmentation-three.vercel.app/
+
 The project also includes a **Flask dashboard** that visualizes customer segments and allows **real-time prediction for new customers**.
 
 ---
