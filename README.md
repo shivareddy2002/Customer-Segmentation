@@ -40,7 +40,6 @@ The main goal of this project is to:
 
 # 🗂️ Project Structure
 
-## 🗂️ Project Structure
 ```
 amazon_customer_segmentation/
 │
